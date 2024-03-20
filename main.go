@@ -26,9 +26,11 @@ func main() {
 	http.HandleFunc("/health", healthCheckHandler)
 
 	// Start the HTTP server on port 8080
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
-	}
+	go func() {
+		if err := http.ListenAndServe(":8080", nil); err != nil {
+			log.Fatalf("Failed to start server: %v", err)
+		}
+	}()
 
 	cfg := config.GetConfigFromEnv()
 	fmt.Println(cfg)
