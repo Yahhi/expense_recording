@@ -2,23 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"log"
 	"strings"
 	"time"
 
 	"gopkg.in/tucnak/telebot.v2"
-	config "ingresos_gastos/config"
+	"ingresos_gastos/config"
 	"ingresos_gastos/db"
 	"ingresos_gastos/speaking"
 )
 
 // t@Gastos_Ingresos_bot
 func main() {
-	errLoadingConfig := godotenv.Load()
-	if errLoadingConfig != nil {
-		log.Fatalf("Error loading .env file")
-	}
 	cfg := config.GetConfigFromEnv()
 	fmt.Println(cfg)
 	// Initialize the database
@@ -34,7 +29,7 @@ func main() {
 		return
 	}
 
-	env := speaking.Env{storage, bot}
+	env := speaking.Env{Storage: storage, Bot: bot}
 	bot.Handle("/"+speaking.CommandStart, func(m *telebot.Message) {
 		env.ProvideGreeting(m.Sender)
 	})
