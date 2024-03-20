@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 
@@ -12,8 +13,23 @@ import (
 	"ingresos_gastos/speaking"
 )
 
+func healthCheckHandler(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	_, err := w.Write([]byte("OK"))
+	if err != nil {
+		log.Fatalf("Failed to say OK: %v", err)
+	}
+}
+
 // t@Gastos_Ingresos_bot
 func main() {
+	http.HandleFunc("/health", healthCheckHandler)
+
+	// Start the HTTP server on port 8080
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
+
 	cfg := config.GetConfigFromEnv()
 	fmt.Println(cfg)
 	// Initialize the database
