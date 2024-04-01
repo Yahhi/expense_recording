@@ -1,6 +1,11 @@
+// Package storage_interface defines the standard to which any database connection should fit to be appropriate to work
+// with the bot_interface
+// There are also structure definitions for data used in bot_interface
 package storage_interface
 
-import "time"
+import (
+	"time"
+)
 
 type ActualStorage interface {
 	CreateUser(userID int64, name string) error
@@ -19,8 +24,15 @@ type ActualStorage interface {
 	GetUserTags(userID int64) ([]string, error)
 
 	SaveFeedback(userID int64, message string) error
+
+	SaveMessage(message Message) error
+	GetMessages(userId int64) ([]Message, error)
+	ClearOutgoingMessagesForUser(userID int64) error
+
+	SaveUsageLog(userId int64, replyType string) error
 }
 
+// User is a telegram user, who once spoke with the bot_interface
 type User struct {
 	ID      int
 	Name    string
@@ -28,6 +40,8 @@ type User struct {
 	Created time.Time
 }
 
+// Target describes how much money the [User] wants to spend in the period for a special spending tag.
+// Usually it is about current month
 type Target struct {
 	ID          int
 	Tag         string
@@ -37,6 +51,8 @@ type Target struct {
 	UserID      int
 }
 
+// MoneyEvent is a spending event. It happens when [User] spends some money in a cafe or buys something
+// and tells this fact to the bot_interface
 type MoneyEvent struct {
 	ID       int
 	Amount   float32
@@ -45,4 +61,10 @@ type MoneyEvent struct {
 	Tag      string
 	Created  time.Time
 	UserID   int
+}
+
+// Message is
+type Message struct {
+	ID     string
+	UserID string
 }

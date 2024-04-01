@@ -1,3 +1,4 @@
+// Package db works directly with Postgres database making SQL operand calls to fit storage_interface
 package db
 
 import (
@@ -5,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"ingresos_gastos/config"
@@ -176,6 +178,54 @@ func (db PostgresAdapter) SaveFeedback(userID int64, message string) error {
 	_, err := db.dbInside.Query("INSERT INTO feedback (message, user_id) VALUES ($1, $2) RETURNING id", message, userID)
 	if err != nil {
 		return fmt.Errorf("error saving feedback: %v", err)
+	}
+	return nil
+}
+
+func (db PostgresAdapter) SaveMessage(message storage_interface.Message) error {
+	_, err := db.dbInside.Query("INSERT INTO messages (id, userid) VALUES ($1, $2) RETURNING id", message.ID, message.UserID)
+	if err != nil {
+		return fmt.Errorf("error saving message: %v", err)
+	}
+	return nil
+}
+
+func (db PostgresAdapter) GetMessages(userId int64) ([]storage_interface.Message, error) {
+	var result []storage_interface.Message
+
+	rows, err := db.dbInside.Query("SELECT id FROM messages WHERE userid = $1", userId)
+	if err != nil {
+		return nil, fmt.Errorf("error querring messages: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, fmt.Errorf("error unwrapping messages in GetMessages: %v", err)
+		}
+		result = append(result, storage_interface.Message{ID: id, UserID: strconv.Itoa(int(userId))})
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (db PostgresAdapter) ClearOutgoingMessagesForUser(userID int64) error {
+	_, err := db.dbInside.Exec("DELETE FROM messages WHERE userid = $1", userID)
+	if err != nil {
+		return fmt.Errorf("error deleting messages for user %d: %v", userID, err)
+	}
+	return nil
+}
+
+func (db PostgresAdapter) SaveUsageLog(userId int64, replyType string) error {
+	_, err := db.dbInside.Query("INSERT INTO usage_log (reply_type, user_id) VALUES ($1, $2) RETURNING id", replyType, userId)
+	if err != nil {
+		return fmt.Errorf("error saving log: %v", err)
 	}
 	return nil
 }

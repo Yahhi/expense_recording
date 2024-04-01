@@ -1,3 +1,5 @@
+// Package config helps to describe the data required to make app work. In fact these are Postgres connection settings
+// and Telegram Bot token
 package config
 
 import (

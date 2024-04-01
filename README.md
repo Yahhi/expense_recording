@@ -12,8 +12,11 @@ All current table creation scripts are located in db/migrations
 
 More information: https://github.com/golang-migrate/migrate
 
+## Health check
+There is a default endpoint for healthcheck which replies OK when asked as a web-server at port 8080
+
 ## Running
-You need to add .env file with the following settings:
+You have to set up the following settings as environment variables:
 ```
 PGHOST=<HOST> 
 PGPORT=<PORT>
